@@ -9,11 +9,17 @@ import axios from 'axios';
 const API_KEY = '679609-0229bb159674f4386da445b6d';
 const form = document.getElementById('search-form');
 const gallery = document.getElementById('gallery');
+const loadMoreBtn = document.getElementById('load-more');
+const loader = document.getElementById('loader');
+
+let currentPage = 1; // Zmienna globalna dla paginacji
+let totalHits = 0; // Zmienna do przechowywania liczby wszystkich dostępnych obrazów
+let query = ''; // Globalna zmienna przechowująca aktualne zapytanie
 
 form.addEventListener('submit', event => {
   event.preventDefault();
 
-  const query = event.target.search.value.trim();
+  query = event.target.search.value.trim();
   if (!query) {
     iziToast.error({
       title: 'Error',
@@ -22,20 +28,30 @@ form.addEventListener('submit', event => {
     return;
   }
 
+  gallery.innerHTML = ''; // Wyczyść galerię dla nowego zapytania
+  loadMoreBtn.style.display = 'none'; // Ukryj przycisk na początku wyszukiwania
+  currentPage = 1; // Resetuj paginację dla nowego zapytania
   searchImages(query);
 });
 
-function searchImages(query) {
+loadMoreBtn.addEventListener('click', () => {
+  currentPage++; // Zwiększ stronę, aby załadować więcej obrazów
+  searchImages(query);
+});
+
+async function searchImages(query) {
   const url = `https://pixabay.com/api/?key=${API_KEY}&q=${encodeURIComponent(
     query
-  )}&image_type=photo&orientation=horizontal&safesearch=true`;
+  )}&image_type=photo&orientation=horizontal&safesearch=true&page=${currentPage}&per_page=40`;
 
-  gallery.innerHTML = '';
+  try {
+    loader.style.display = 'block'; // Pokaż loader
+    const response = await axios.get(url);
+    const data = response.data;
 
-  fetch(url)
-    .then(response => response.json())
-    .then(data => {
-      if (data.hits.length === 0) {
+    if (currentPage === 1) {
+      totalHits = data.totalHits; // Przechowaj całkowitą liczbę obrazów
+      if (totalHits === 0) {
         iziToast.info({
           title: 'Info',
           message:
@@ -44,19 +60,33 @@ function searchImages(query) {
         gallery.innerHTML = '';
         return;
       }
-      displayImages(data.hits);
-    })
-    .catch(error => {
-      iziToast.error({
-        title: 'Error',
-        message: 'Something went wrong. Please try again later.',
+    }
+
+    displayImages(data.hits);
+
+    if (gallery.children.length >= totalHits) {
+      // Jeśli osiągnięto koniec zbioru
+      iziToast.info({
+        title: 'Info',
+        message: "We're sorry, but you've reached the end of search results.",
       });
-      console.error('Error fetching images:', error);
+      loadMoreBtn.style.display = 'none'; // Ukryj przycisk "Load more"
+    } else {
+      loadMoreBtn.style.display = 'block'; // Pokaż przycisk "Load more"
+    }
+  } catch (error) {
+    iziToast.error({
+      title: 'Error',
+      message: 'Something went wrong. Please try again later.',
     });
+    console.error('Error fetching images:', error);
+  } finally {
+    loader.style.display = 'none'; // Ukryj loader po zakończeniu żądania
+  }
 }
 
 function displayImages(images) {
-  gallery.innerHTML = images
+  const markup = images
     .map(
       image => `
         <a href="${image.largeImageURL}" class="image-card">
@@ -71,8 +101,7 @@ function displayImages(images) {
     )
     .join('');
 
-  const lightbox = new SimpleLightbox('.gallery a', {
-    /* opcje? */
-  });
+  gallery.insertAdjacentHTML('beforeend', markup); // Dodaj obrazy do galerii
+  const lightbox = new SimpleLightbox('.gallery a');
   lightbox.refresh();
 }
