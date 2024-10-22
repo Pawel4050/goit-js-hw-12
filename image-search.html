@@ -8,9 +8,9 @@
   <title>Image search</title>
   <script type="module" crossorigin src="/goit-js-hw-12/image-search.js"></script>
   <link rel="modulepreload" crossorigin href="/goit-js-hw-12/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/goit-js-hw-12/assets/vendor-5ObWk2rO.js">
+  <link rel="modulepreload" crossorigin href="/goit-js-hw-12/assets/vendor-D73Uttp0.js">
   <link rel="stylesheet" crossorigin href="/goit-js-hw-12/assets/vendor-DumFYO8Z.css">
-  <link rel="stylesheet" crossorigin href="/goit-js-hw-12/assets/styles-Cm94EHL5.css">
+  <link rel="stylesheet" crossorigin href="/goit-js-hw-12/assets/styles-DKaqpeND.css">
 </head>
 
 <body>
@@ -42,9 +42,17 @@
         <button type="submit">Search</button>
       </form>
     </div>
-    <div class="loader"></div>
+
+    <!-- Galeria obrazów -->
     <div id="gallery" class="gallery"></div>
+
+    <!-- Wskaźnik ładowania -->
+    <div id="loader" class="loader" style="display: none;">Loading...</div>
+
+    <!-- Przycisk "Load more" -->
+    <button id="load-more" style="display: none;">Load more</button>
   </main>
+
 
 </body>
 
