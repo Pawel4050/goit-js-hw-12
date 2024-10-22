@@ -4,6 +4,8 @@ import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
+import axios from 'axios';
+
 const API_KEY = '679609-0229bb159674f4386da445b6d';
 const form = document.getElementById('search-form');
 const gallery = document.getElementById('gallery');
